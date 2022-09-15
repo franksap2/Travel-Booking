@@ -1,0 +1,3 @@
+rootProject.name = "TravelBooking"
+include ':app'
+include ':core-data'
