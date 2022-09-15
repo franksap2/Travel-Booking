@@ -18,7 +18,7 @@ object Versions {
     const val hilt = "2.42"
     const val google_service = "4.3.13"
     const val coroutines = "1.6.4"
-    const val gson = "2.9.1"
+    const val coil = "2.2.1"
 }
 
 object Plugins {
@@ -37,16 +37,20 @@ object Dependencies {
         private const val compose_material = "androidx.compose.material:material:${Versions.compose}"
         private const val compose_navigation = "androidx.navigation:navigation-compose:${Versions.nav_version}"
         private const val compose_hilt = "androidx.hilt:hilt-navigation-compose:${Versions.compose_hilt}"
+        private const val coil_compose = "io.coil-kt:coil-compose:${Versions.coil}"
 
-        fun DependencyHandler.implementCompose() {
-            implementation(compose_ui)
-            implementation(compose_ui_tooling)
-            implementation(compose_activity)
-            implementation(compose_foundation)
-            implementation(compose_material)
-            implementation(compose_navigation)
-            implementation(compose_hilt)
+        fun DependencyHandler.apiCompose() {
+            api(compose_ui)
+            api(compose_ui_tooling)
+            api(compose_activity)
+            api(compose_foundation)
+            api(compose_material)
+            api(compose_navigation)
+            api(compose_hilt)
+            api(coil_compose)
         }
+
+
     }
 
     object Androidx {
@@ -65,12 +69,10 @@ object Dependencies {
 
     object Google {
 
-        private const val gson = "com.google.code.gson:gson:${Versions.gson}"
         private const val hilt_android = "com.google.dagger:hilt-android:${Versions.hilt}"
         private const val hilt_compiler = "com.google.dagger:hilt-compiler:${Versions.hilt}"
 
         fun DependencyHandler.implementHilt() {
-            implementation(gson)
             implementation(hilt_android)
             add("kapt", hilt_compiler)
         }
@@ -92,5 +94,9 @@ object Dependencies {
 
 fun DependencyHandler.implementation(dependency: Any) {
     add("implementation", dependency)
+}
+
+fun DependencyHandler.api(dependency: Any) {
+    add("api", dependency)
 }
 

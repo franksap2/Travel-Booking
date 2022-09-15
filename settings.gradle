@@ -1,3 +1,5 @@
 rootProject.name = "TravelBooking"
 include ':app'
 include ':core-data'
+include ':feature-onboarding'
+include ':core-ui'
