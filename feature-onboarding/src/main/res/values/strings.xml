@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="onboarding_title">Start your dreamed journey</string>
+    <string name="onboarding_subtitle">Ready to find the best places?</string>
+    <string name="onboarding_button">Find journey</string>
 
 </resources>
