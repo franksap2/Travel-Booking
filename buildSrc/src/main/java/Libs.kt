@@ -19,6 +19,7 @@ object Versions {
     const val google_service = "4.3.13"
     const val coroutines = "1.6.4"
     const val coil = "2.2.1"
+    const val serialization = "1.4.0"
 }
 
 object Plugins {
