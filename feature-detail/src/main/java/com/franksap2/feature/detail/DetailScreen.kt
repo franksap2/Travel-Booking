@@ -74,8 +74,7 @@ private fun DetailScreenContent(place: Place) {
     val progress by remember {
         derivedStateOf {
             val fraction = state.bottomSheetState.progress.fraction
-            val alpha = if (state.bottomSheetState.progress.to == BottomSheetValue.Expanded) fraction else 1 - fraction
-            (alpha / ALPHA_REVEAL_PERCENT).coerceIn(0f, 1f)
+            if (state.bottomSheetState.progress.to == BottomSheetValue.Expanded) fraction else 1 - fraction
         }
     }
 
@@ -105,7 +104,7 @@ private fun DetailScreenContent(place: Place) {
                 modifier = Modifier
                     .fillMaxSize()
                     .graphicsLayer {
-                        val scale = MathUtils.lerp(1f,1.3f,progress)
+                        val scale = MathUtils.lerp(1f, 1.3f, progress)
                         scaleX = scale
                         scaleY = scale
                     },
@@ -144,7 +143,7 @@ private fun SheetContent(
             LocationText(
                 modifier = Modifier
                     .padding(top = 12.dp)
-                    .alpha(alpha = progressProvider()),
+                    .alpha(alpha = (progressProvider() / ALPHA_REVEAL_PERCENT).coerceIn(0f, 1f)),
                 text = place.place,
                 secondText = place.country,
                 style = MaterialTheme.typography.h6,
