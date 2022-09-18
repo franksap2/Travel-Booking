@@ -5,7 +5,15 @@ internal data class PlaceNetwork(
     val img: String,
     val country: String,
     val place: String,
-    val category: String
+    val category: String,
+    val price: Float
 )
 
-internal fun PlaceNetwork.asExternal() = Place(id, img, country, place, category)
+internal fun PlaceNetwork.asExternal() = Place(
+    id = id,
+    img = img,
+    country = country,
+    place = place,
+    category = category,
+    price = price
+)

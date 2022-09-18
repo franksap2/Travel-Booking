@@ -5,5 +5,6 @@ data class Place(
     val img: String,
     val country: String,
     val place: String,
-    val category: String
+    val category: String,
+    val price: Float
 )

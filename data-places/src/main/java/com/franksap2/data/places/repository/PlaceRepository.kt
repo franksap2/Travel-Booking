@@ -6,8 +6,10 @@ import kotlinx.coroutines.flow.Flow
 
 interface PlaceRepository {
 
-    fun collectPlaces() : Flow<List<Place>>
+    fun collectPlaces(): Flow<List<Place>>
 
-    fun collectTopPlaces() : Flow<List<TopPlace>>
+    fun collectTopPlaces(): Flow<List<TopPlace>>
+
+    suspend fun getPlaceById(id: String): Place
 
 }

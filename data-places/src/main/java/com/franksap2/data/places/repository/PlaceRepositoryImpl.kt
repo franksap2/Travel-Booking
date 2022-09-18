@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 
 internal class PlaceRepositoryImpl @Inject constructor() : PlaceRepository {
 
@@ -21,6 +22,13 @@ internal class PlaceRepositoryImpl @Inject constructor() : PlaceRepository {
         emit(fakeTopPlaces().map { it.asExternal() })
     }.flowOn(Dispatchers.IO)
 
+
+    override suspend fun getPlaceById(id: String): Place {
+        return withContext(Dispatchers.IO) {
+            fakePlaces().first { it.id == id }.asExternal()
+        }
+    }
+
 }
 
 private fun fakePlaces() = listOf(
@@ -29,28 +37,32 @@ private fun fakePlaces() = listOf(
         img = "https://source.unsplash.com/DtWyp_4YEes",
         country = "Maldives",
         place = "Noonu Atoll",
-        category = "Beach"
+        category = "Beach",
+        price = 599.99f
     ),
     PlaceNetwork(
         id = "2",
         img = "https://source.unsplash.com/VcWIMPXiGlU",
         country = "Italy",
         place = "Metropolitan city of Rome",
-        category = "Cites"
+        category = "Cites",
+        price = 199.99f
     ),
     PlaceNetwork(
         id = "3",
         img = "https://source.unsplash.com/gfD4hwudzJI",
         country = "Spain",
         place = "Madrid",
-        category = "Cites"
+        category = "Cites",
+        price = 199.99f
     ),
     PlaceNetwork(
         id = "4",
         img = "https://source.unsplash.com/hDU0hkN4ZZI",
         country = "Brazil",
         place = "Foz do Iguaçu",
-        category = "Forest"
+        category = "Forest",
+        price = 99.99f
     )
 )
 

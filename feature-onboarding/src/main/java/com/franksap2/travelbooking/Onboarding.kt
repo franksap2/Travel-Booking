@@ -68,6 +68,7 @@ fun Onboarding(onClickContinue: () -> Unit) {
 
             Text(
                 modifier = Modifier
+                    .padding(horizontal = 16.dp)
                     .graphicsLayer {
                         alpha = revealAnimation.value
                         translationY = titleRevealTranslation.toPx() * (1 - revealAnimation.value)

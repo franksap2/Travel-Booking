@@ -19,7 +19,9 @@ object Versions {
     const val google_service = "4.3.13"
     const val coroutines = "1.6.4"
     const val coil = "2.2.1"
+    const val accompanist = "0.25.1"
     const val serialization = "1.4.0"
+    const val material = "1.6.1"
 }
 
 object Plugins {
@@ -72,6 +74,8 @@ object Dependencies {
 
         private const val hilt_android = "com.google.dagger:hilt-android:${Versions.hilt}"
         private const val hilt_compiler = "com.google.dagger:hilt-compiler:${Versions.hilt}"
+
+        const val material = "com.google.android.material:material:${Versions.material}"
 
         fun DependencyHandler.implementHilt() {
             implementation(hilt_android)
