@@ -18,35 +18,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.franksap2.data.places.model.TopPlace
-import com.franksap2.feature.home.R
 
 @Composable
 fun TopPlaces(topPlaces: List<TopPlace>) {
-
-    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
-
-        Text(
-            modifier = Modifier.padding(start = 16.dp, top = 32.dp),
-            text = stringResource(id = R.string.top_places),
-            color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.h5
-        )
-
-        LazyRow(
-            modifier = Modifier
-                .fillMaxSize()
-                .height(82.dp),
-            horizontalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(horizontal = 16.dp)
-        ) {
-            items(topPlaces, key = { it.id }) { TopPlaceItem(it) }
-        }
+    LazyRow(
+        modifier = Modifier
+            .fillMaxSize()
+            .height(82.dp),
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp)
+    ) {
+        items(topPlaces, key = { it.id }) { TopPlaceItem(it) }
     }
-
 }
 
 @Composable

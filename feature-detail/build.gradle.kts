@@ -2,36 +2,27 @@ import Dependencies.Androidx.implementAndroidX
 import Dependencies.Google.implementHilt
 
 plugins {
-    id("com.android.application")
+    id("com.android.library")
     id("org.jetbrains.kotlin.android")
     id("dagger.hilt.android.plugin")
     kotlin("kapt")
 }
-apply(plugin = "kotlin-android")
 
 android {
     compileSdk = Versions.compileSdk
 
     defaultConfig {
-        applicationId = "com.franksap2.travelbooking"
         minSdk = Versions.minSdk
         targetSdk = Versions.targetSdk
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        vectorDrawables.useSupportLibrary = true
-        signingConfig = signingConfigs.getByName("debug")
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     compileOptions {
@@ -47,29 +38,19 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = Versions.compose_compiler
     }
-    packagingOptions {
-        resources.excludes += "META-INF/AL2.0"
-        resources.excludes += "META-INF/LGPL2.1"
-        resources.excludes += "DebugProbesKt.bin"
+    kotlinOptions {
+        jvmTarget = "1.8"
     }
 }
 
 dependencies {
 
+    implementation(project(":core-ui"))
+    implementation(project((":data-places")))
     implementAndroidX()
     implementHilt()
-    implementation(project(":feature-onboarding"))
-    implementation(project(":feature-home"))
-    implementation(project(":feature-detail"))
-    implementation(project(":core-ui"))
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.2.1")
-    debugImplementation("androidx.compose.ui:ui-tooling:1.2.1")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.2.1")
-
 }
-
-

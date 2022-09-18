@@ -1,6 +1,7 @@
 package com.franksap2.feature.home.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -40,7 +41,7 @@ import com.franksap2.travelbooking.core.ui.theme.extraLarge
 
 
 @Composable
-fun Places(item: List<Place>) {
+fun Places(item: List<Place>, onClick: (String) -> Unit) {
 
     LazyRow(
         modifier = Modifier
@@ -49,19 +50,19 @@ fun Places(item: List<Place>) {
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(horizontal = 16.dp),
         content = {
-            items(item) {
-                PlaceItem(item = it)
+            items(item, key = { it.id }) {
+                PlaceItem(item = it, onClick = onClick)
             }
         })
-
 }
 
 @Composable
-private fun PlaceItem(item: Place) {
+private fun PlaceItem(item: Place, onClick: (String) -> Unit) {
 
     Card(
         modifier = Modifier
             .fillMaxHeight()
+            .clickable { onClick(item.id) }
             .aspectRatio(0.62f),
         elevation = 4.dp,
         shape = MaterialTheme.shapes.extraExtraLarge
