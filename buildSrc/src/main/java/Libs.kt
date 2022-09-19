@@ -41,6 +41,7 @@ object Dependencies {
         private const val compose_navigation = "androidx.navigation:navigation-compose:${Versions.nav_version}"
         private const val compose_hilt = "androidx.hilt:hilt-navigation-compose:${Versions.compose_hilt}"
         private const val coil_compose = "io.coil-kt:coil-compose:${Versions.coil}"
+        private const val accompanist = "com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}"
 
         fun DependencyHandler.apiCompose() {
             api(compose_ui)
@@ -51,6 +52,7 @@ object Dependencies {
             api(compose_navigation)
             api(compose_hilt)
             api(coil_compose)
+            api(accompanist)
         }
 
 

@@ -3,11 +3,8 @@
 package com.franksap2.feature.detail
 
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.Divider
@@ -39,7 +35,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -48,13 +44,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.franksap2.data.places.model.Place
 import com.franksap2.travelbooking.core.ui.components.LocationText
+import com.franksap2.travelbooking.core.ui.components.TravelBookingButton
 import com.franksap2.travelbooking.core.ui.extensions.formatCurrency
+import com.franksap2.travelbooking.core.ui.extensions.overlay
 import com.franksap2.travelbooking.core.ui.theme.topLarge
 import com.google.android.material.math.MathUtils
 
 private val sheetContentVerticalPadding = 24.dp
 private val sheetContentHorizontalPadding = 16.dp
 private const val ALPHA_REVEAL_PERCENT = 0.3f
+private const val OVERLAY_ALPHA = 0.25f
 
 @Composable
 fun DetailScreen(
@@ -103,6 +102,7 @@ private fun DetailScreenContent(place: Place) {
             AsyncImage(
                 modifier = Modifier
                     .fillMaxSize()
+                    .overlay(alpha = OVERLAY_ALPHA * progress)
                     .graphicsLayer {
                         val scale = MathUtils.lerp(1f, 1.3f, progress)
                         scaleX = scale
@@ -126,34 +126,16 @@ private fun SheetContent(
 
     val navigationBarsPadding = WindowInsets.navigationBars.asPaddingValues()
 
-
-    Box(
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .padding(navigationBarsPadding)
             .padding(horizontal = sheetContentHorizontalPadding, vertical = sheetContentVerticalPadding)
     ) {
-
-        Box(modifier = Modifier.fillMaxSize(0.5f))
-
-        Column {
-
-            Header(place = place, navigationBarsPadding = navigationBarsPadding, sheetPeekHeight = sheetPeekHeight)
-
-            LocationText(
-                modifier = Modifier
-                    .padding(top = 12.dp)
-                    .alpha(alpha = (progressProvider() / ALPHA_REVEAL_PERCENT).coerceIn(0f, 1f)),
-                text = place.place,
-                secondText = place.country,
-                style = MaterialTheme.typography.h6,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-
+        Header(place = place, navigationBarsPadding = navigationBarsPadding, sheetPeekHeight = sheetPeekHeight)
+        Content(place = place, progressProvider = progressProvider)
     }
+
 }
 
 @Composable
@@ -167,11 +149,12 @@ private fun Header(
     val density = LocalDensity.current.density
 
     Column(
-        modifier = Modifier.onSizeChanged {
-            val targetPeekHeight = (it.height / density).dp + sheetContentVerticalPadding + 20.dp
-            sheetPeekHeight(targetPeekHeight + navigationBarsPadding.calculateBottomPadding())
-        },
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .onSizeChanged {
+                val targetPeekHeight = (it.height / density).dp + sheetContentVerticalPadding + 20.dp
+                sheetPeekHeight(targetPeekHeight + navigationBarsPadding.calculateBottomPadding())
+            }
     ) {
 
         Divider(
@@ -182,28 +165,55 @@ private fun Header(
             thickness = 6.dp
         )
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                modifier = Modifier.weight(1f),
-                text = place.place,
-                style = MaterialTheme.typography.h4,
-                color = MaterialTheme.colors.onBackground,
-
-                )
-            Text(
-                modifier = Modifier,
-                text = place.price.formatCurrency(),
-                style = MaterialTheme.typography.h4,
-                color = MaterialTheme.colors.secondary,
-                fontWeight = FontWeight.Bold
-            )
-        }
+        Text(
+            modifier = Modifier.padding(top = 8.dp),
+            text = place.place,
+            style = MaterialTheme.typography.h4,
+            color = MaterialTheme.colors.onBackground,
+        )
+        Text(
+            modifier = Modifier,
+            text = place.price.formatCurrency(),
+            style = MaterialTheme.typography.h6,
+            color = MaterialTheme.colors.secondary,
+            fontWeight = FontWeight.Bold
+        )
     }
 
 }
 
 @Composable
-private fun buildLocationText(text: String) = buildAnnotatedString {
-    appendInlineContent("icon")
-    append(text)
+private fun Content(place: Place, progressProvider: () -> Float) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(alpha = (progressProvider() / ALPHA_REVEAL_PERCENT).coerceIn(0f, 1f))
+    ) {
+        LocationText(
+            modifier = Modifier
+                .padding(top = 12.dp),
+            text = place.place,
+            secondText = place.country,
+            style = MaterialTheme.typography.h6,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+
+        Text(
+            modifier = Modifier.padding(top = 12.dp),
+            text = place.description,
+            style = MaterialTheme.typography.subtitle1,
+            color = MaterialTheme.colors.onBackground.copy(alpha = 0.7f)
+        )
+
+        TravelBookingButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 32.dp),
+            text = stringResource(id = R.string.book_now),
+            onClick = {},
+            style = MaterialTheme.typography.h6
+        )
+    }
 }

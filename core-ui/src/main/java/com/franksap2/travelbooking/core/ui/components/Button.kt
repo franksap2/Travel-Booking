@@ -6,6 +6,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 
 private val defaultButtonPadding = PaddingValues(horizontal = 30.dp, vertical = 10.dp)
@@ -14,7 +15,8 @@ private val defaultButtonPadding = PaddingValues(horizontal = 30.dp, vertical = 
 fun TravelBookingButton(
     text: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    style: TextStyle = MaterialTheme.typography.button
 ) {
 
     Button(
@@ -25,7 +27,7 @@ fun TravelBookingButton(
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.button,
+            style =style,
         )
     }
 

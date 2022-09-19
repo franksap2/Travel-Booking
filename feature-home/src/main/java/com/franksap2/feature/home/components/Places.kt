@@ -33,7 +33,7 @@ fun Places(item: List<Place>, onClick: (String) -> Unit) {
     LazyRow(
         modifier = Modifier
             .fillMaxSize()
-            .height(500.dp),
+            .height(400.dp),
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         contentPadding = PaddingValues(horizontal = 16.dp),
         content = {
