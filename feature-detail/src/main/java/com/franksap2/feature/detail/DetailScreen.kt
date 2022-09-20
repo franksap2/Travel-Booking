@@ -3,6 +3,8 @@
 package com.franksap2.feature.detail
 
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
@@ -11,11 +13,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.rememberBottomSheetScaffoldState
@@ -31,10 +37,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -57,10 +65,29 @@ private const val OVERLAY_ALPHA = 0.25f
 
 @Composable
 fun DetailScreen(
+    onBack: () -> Unit,
     viewModel: DetailViewModel = hiltViewModel()
 ) {
     val placeState by viewModel.placeState.collectAsState()
-    placeState?.let { DetailScreenContent(it) }
+    placeState?.let {
+        Box(modifier = Modifier.fillMaxSize()) {
+            DetailScreenContent(it)
+
+            IconButton(
+                modifier = Modifier
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 32.dp)
+                    .background(Color.Black.copy(0.7f), CircleShape),
+                onClick = onBack
+            ) {
+                Icon(
+                    painter = painterResource(id = com.franksap2.travelbooking.core.ui.R.drawable.ic_back),
+                    contentDescription = null,
+                    tint = Color.White
+                )
+            }
+        }
+    }
 }
 
 @Composable

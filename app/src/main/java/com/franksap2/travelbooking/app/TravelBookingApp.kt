@@ -36,7 +36,7 @@ fun TravelBookingApp() {
                 route = "${Destinations.PLACE_DETAIL}/{${PLACE_ID}}",
                 arguments = listOf(navArgument(PLACE_ID) { type = NavType.StringType })
             ) {
-                DetailScreen()
+                DetailScreen(onBack = { navController.popBackStack() })
             }
         }
     }
