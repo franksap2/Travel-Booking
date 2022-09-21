@@ -1,6 +1,7 @@
 package com.franksap2.feature.detail.components
 
 import android.graphics.Paint
+import android.icu.text.DateFormatSymbols
 import android.text.TextPaint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -30,10 +31,13 @@ private const val DAYS_IN_WEEK = 7
 @Composable
 fun Calendar() {
 
+    val weekDayTextPaintPaint = rememberTextPaint(textSize = 16.sp, color = MaterialTheme.colors.onBackground.copy(alpha = 0.3f))
     val textPaint = rememberTextPaint(textSize = 16.sp, color = MaterialTheme.colors.onBackground)
     val calendar = rememberCalendar()
     val startOffset = calendar.findDayOffset()
     val maxDaysOffset = startOffset + calendar.getActualMaximum(android.icu.util.Calendar.DAY_OF_MONTH)
+
+    val dayLabels = rememberDayLabels(calendar)
 
     BoxWithConstraints {
 
@@ -49,39 +53,67 @@ fun Calendar() {
                 .fillMaxWidth()
                 .height(contentHeight.dp),
             onDraw = {
-                var previousHeight = cellSize
-                var previousLeft = startOffset * cellSize
-                var column = startOffset
-
-                val rowCenter = cellSize / 2
-
-                for (i in startOffset until maxDaysOffset) {
-                    drawCalendar(
-                        i,
-                        rowCenter,
-                        previousHeight,
-                        previousLeft,
-                        startOffset,
-                        textPaint
-                    )
-
-                    if (column == DAYS_IN_WEEK - 1) {
-                        previousHeight += cellSize
-                        previousLeft = 0
-                        column = 0
-                    } else {
-                        previousLeft += cellSize
-                        column++
-                    }
-                }
+                drawCalendar(maxDaysOffset, startOffset, textPaint, cellSize)
+                drawDays(dayLabels, cellSize, weekDayTextPaintPaint)
             }
         )
     }
 }
 
+private fun DrawScope.drawDays(
+    dayLabels: Array<String>,
+    cellSize: Int,
+    textPaint: TextPaint
+) {
+    val rowCenter = cellSize / 2
+    var previousLeft = 0
+    dayLabels.forEach { day ->
+        drawIntoCanvas {
+            it.nativeCanvas.drawText(
+                day,
+                previousLeft + rowCenter.toFloat(),
+                rowCenter - (textPaint.descent() + textPaint.ascent()) / 2,
+                textPaint
+            )
+        }
+        previousLeft += cellSize
+    }
+}
 
 
 private fun DrawScope.drawCalendar(
+    maxDaysOffset: Int,
+    startOffset: Int,
+    textPaint: TextPaint,
+    cellSize: Int
+) {
+    val rowCenter = cellSize / 2
+    var previousHeight = cellSize
+    var previousLeft = startOffset * cellSize
+    var column = startOffset
+
+    for (i in startOffset until maxDaysOffset) {
+        drawDate(
+            i,
+            rowCenter,
+            previousHeight,
+            previousLeft,
+            startOffset,
+            textPaint
+        )
+
+        if (column == DAYS_IN_WEEK - 1) {
+            previousHeight += cellSize
+            previousLeft = 0
+            column = 0
+        } else {
+            previousLeft += cellSize
+            column++
+        }
+    }
+}
+
+private fun DrawScope.drawDate(
     index: Int,
     rowCenter: Int,
     previousHeight: Int,
@@ -131,4 +163,18 @@ private fun JavaCalendar.findDayOffset(): Int {
     } else {
         offset
     }
+}
+
+@Composable
+private fun rememberDayLabels(calendar: JavaCalendar) = remember {
+
+    val weekDays = DateFormatSymbols.getInstance().getWeekdays(
+        DateFormatSymbols.FORMAT,
+        DateFormatSymbols.NARROW
+    )
+    val firstDayOfWeek = calendar.firstDayOfWeek
+    Array(DAYS_IN_WEEK) {
+        weekDays[(firstDayOfWeek + it - 1) % DAYS_IN_WEEK + 1]
+    }
+
 }

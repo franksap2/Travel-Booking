@@ -2,10 +2,9 @@
 
 package com.franksap2.feature.detail
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -209,18 +208,15 @@ private fun Content(
     uiState: DetailUiState
 ) {
 
-    Column(
+    AnimatedContent(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize()
             .alpha(alpha = (progressProvider() / ALPHA_REVEAL_PERCENT).coerceIn(0f, 1f)),
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-
-        if (uiState.detailType == DetailType.Info) {
-            PlaceInfo(place = uiState.place)
-        } else {
-            Calendar()
+        targetState = uiState.detailType,
+    ) { targetState ->
+        when (targetState) {
+            DetailType.Info -> PlaceInfo(place = uiState.place)
+            DetailType.Booking -> Calendar()
         }
     }
 
@@ -236,19 +232,21 @@ private fun Content(
 
 @Composable
 private fun PlaceInfo(place: Place?) {
-    LocationText(
-        modifier = Modifier.padding(top = 12.dp),
-        text = place?.place.orEmpty(),
-        secondText = place?.country.orEmpty(),
-        style = MaterialTheme.typography.h6,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis
-    )
+    Column {
+        LocationText(
+            modifier = Modifier.padding(top = 12.dp),
+            text = place?.place.orEmpty(),
+            secondText = place?.country.orEmpty(),
+            style = MaterialTheme.typography.h6,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
 
-    Text(
-        modifier = Modifier.padding(top = 12.dp),
-        text = place?.description.orEmpty(),
-        style = MaterialTheme.typography.subtitle1,
-        color = MaterialTheme.colors.onBackground.copy(alpha = 0.7f)
-    )
+        Text(
+            modifier = Modifier.padding(top = 12.dp),
+            text = place?.description.orEmpty(),
+            style = MaterialTheme.typography.subtitle1,
+            color = MaterialTheme.colors.onBackground.copy(alpha = 0.7f)
+        )
+    }
 }
