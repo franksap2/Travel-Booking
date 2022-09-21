@@ -1,9 +1,11 @@
-@file:OptIn(ExperimentalMaterialApi::class)
+@file:OptIn(ExperimentalMaterialApi::class, ExperimentalAnimationApi::class)
 
 package com.franksap2.feature.detail
 
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,20 +15,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.BottomSheetValue
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -55,7 +54,6 @@ import com.franksap2.travelbooking.core.ui.components.LocationText
 import com.franksap2.travelbooking.core.ui.components.TravelBookingButton
 import com.franksap2.travelbooking.core.ui.extensions.formatCurrency
 import com.franksap2.travelbooking.core.ui.extensions.overlay
-import com.franksap2.travelbooking.core.ui.theme.topLarge
 import com.google.android.material.math.MathUtils
 
 private val sheetContentVerticalPadding = 24.dp
@@ -68,61 +66,55 @@ fun DetailScreen(
     onBack: () -> Unit,
     viewModel: DetailViewModel = hiltViewModel()
 ) {
-    val placeState by viewModel.placeState.collectAsState()
-    placeState?.let {
-        Box(modifier = Modifier.fillMaxSize()) {
-            DetailScreenContent(it)
+    val placeUiState by viewModel.uiState.collectAsState()
 
-            IconButton(
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 32.dp)
-                    .background(Color.Black.copy(0.7f), CircleShape),
-                onClick = onBack
-            ) {
-                Icon(
-                    painter = painterResource(id = com.franksap2.travelbooking.core.ui.R.drawable.ic_back),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-            }
+    if (placeUiState.place == null) return
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        DetailScreenContent(placeUiState, viewModel::onBooking)
+
+        IconButton(
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 32.dp)
+                .background(Color.Black.copy(0.7f), CircleShape),
+            onClick = onBack
+        ) {
+            Icon(
+                painter = painterResource(id = com.franksap2.travelbooking.core.ui.R.drawable.ic_back),
+                contentDescription = null,
+                tint = Color.White
+            )
         }
     }
+
 }
 
 @Composable
-private fun DetailScreenContent(place: Place) {
+private fun DetailScreenContent(uiState: DetailUiState, onBooking: () -> Unit) {
 
     var sheetPeekHeight by remember { mutableStateOf(0.dp) }
 
-    val state = rememberBottomSheetScaffoldState()
+    val bookingBottomSheet = rememberTravelBookingBottomSheet()
 
     val progress by remember {
         derivedStateOf {
-            val fraction = state.bottomSheetState.progress.fraction
-            if (state.bottomSheetState.progress.to == BottomSheetValue.Expanded) fraction else 1 - fraction
+            val fraction = bookingBottomSheet.progress.fraction
+            if (bookingBottomSheet.progress.to == TravelBookingBottomSheetValue.Expanded) fraction else 1 - fraction
         }
     }
 
-    LaunchedEffect(key1 = Unit) {
-        state.bottomSheetState.animateTo(
-            BottomSheetValue.Expanded,
-            tween(400)
-        )
-    }
-
-    BottomSheetScaffold(
-        scaffoldState = state,
+    TravelBookingBottomSheet(
+        state = bookingBottomSheet,
         sheetPeekHeight = sheetPeekHeight,
-        sheetShape = MaterialTheme.shapes.topLarge,
 
         sheetContent = {
-
             SheetContent(
                 modifier = Modifier.fillMaxWidth(),
-                place = place,
+                uiState = uiState,
                 sheetPeekHeight = { sheetPeekHeight = it },
-                progressProvider = { progress }
+                progressProvider = { progress },
+                onBooking = onBooking
             )
 
         }, content = {
@@ -135,8 +127,8 @@ private fun DetailScreenContent(place: Place) {
                         scaleX = scale
                         scaleY = scale
                     },
-                model = place.img,
-                contentDescription = place.place,
+                model = uiState.place?.img,
+                contentDescription = uiState.place?.img,
                 contentScale = ContentScale.Crop
             )
         }
@@ -145,10 +137,11 @@ private fun DetailScreenContent(place: Place) {
 
 @Composable
 private fun SheetContent(
-    place: Place,
     sheetPeekHeight: (Dp) -> Unit,
     modifier: Modifier = Modifier,
-    progressProvider: () -> Float
+    progressProvider: () -> Float,
+    onBooking: () -> Unit,
+    uiState: DetailUiState
 ) {
 
     val navigationBarsPadding = WindowInsets.navigationBars.asPaddingValues()
@@ -159,15 +152,15 @@ private fun SheetContent(
             .padding(navigationBarsPadding)
             .padding(horizontal = sheetContentHorizontalPadding, vertical = sheetContentVerticalPadding)
     ) {
-        Header(place = place, navigationBarsPadding = navigationBarsPadding, sheetPeekHeight = sheetPeekHeight)
-        Content(place = place, progressProvider = progressProvider)
+        Header(place = uiState.place, navigationBarsPadding = navigationBarsPadding, sheetPeekHeight = sheetPeekHeight)
+        Content(uiState = uiState, progressProvider = progressProvider, onBooking = onBooking)
     }
 
 }
 
 @Composable
 private fun Header(
-    place: Place,
+    place: Place?,
     navigationBarsPadding: PaddingValues,
     sheetPeekHeight: (Dp) -> Unit,
 ) {
@@ -194,13 +187,13 @@ private fun Header(
 
         Text(
             modifier = Modifier.padding(top = 8.dp),
-            text = place.place,
+            text = place?.place.orEmpty(),
             style = MaterialTheme.typography.h4,
             color = MaterialTheme.colors.onBackground,
         )
         Text(
             modifier = Modifier,
-            text = place.price.formatCurrency(),
+            text = place?.price?.formatCurrency().orEmpty(),
             style = MaterialTheme.typography.h6,
             color = MaterialTheme.colors.secondary,
             fontWeight = FontWeight.Bold
@@ -210,37 +203,52 @@ private fun Header(
 }
 
 @Composable
-private fun Content(place: Place, progressProvider: () -> Float) {
+private fun Content(
+    progressProvider: () -> Float,
+    onBooking: () -> Unit,
+    uiState: DetailUiState
+) {
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .alpha(alpha = (progressProvider() / ALPHA_REVEAL_PERCENT).coerceIn(0f, 1f))
+            .animateContentSize()
+            .alpha(alpha = (progressProvider() / ALPHA_REVEAL_PERCENT).coerceIn(0f, 1f)),
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        LocationText(
-            modifier = Modifier
-                .padding(top = 12.dp),
-            text = place.place,
-            secondText = place.country,
-            style = MaterialTheme.typography.h6,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
 
-        Text(
-            modifier = Modifier.padding(top = 12.dp),
-            text = place.description,
-            style = MaterialTheme.typography.subtitle1,
-            color = MaterialTheme.colors.onBackground.copy(alpha = 0.7f)
-        )
-
-        TravelBookingButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 32.dp),
-            text = stringResource(id = R.string.book_now),
-            onClick = {},
-            style = MaterialTheme.typography.h6
-        )
+        if (uiState.detailType == DetailType.Info) {
+            PlaceInfo(place = uiState.place)
+        } else {
+            Box(modifier = Modifier.size(100.dp))
+        }
     }
+
+    TravelBookingButton(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 32.dp),
+        text = stringResource(id = R.string.book_now),
+        onClick = onBooking,
+        style = MaterialTheme.typography.h6
+    )
+}
+
+@Composable
+private fun PlaceInfo(place: Place?) {
+    LocationText(
+        modifier = Modifier.padding(top = 12.dp),
+        text = place?.place.orEmpty(),
+        secondText = place?.country.orEmpty(),
+        style = MaterialTheme.typography.h6,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis
+    )
+
+    Text(
+        modifier = Modifier.padding(top = 12.dp),
+        text = place?.description.orEmpty(),
+        style = MaterialTheme.typography.subtitle1,
+        color = MaterialTheme.colors.onBackground.copy(alpha = 0.7f)
+    )
 }
