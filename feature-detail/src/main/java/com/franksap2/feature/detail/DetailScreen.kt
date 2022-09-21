@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -50,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.franksap2.data.places.model.Place
+import com.franksap2.feature.detail.components.Calendar
 import com.franksap2.travelbooking.core.ui.components.LocationText
 import com.franksap2.travelbooking.core.ui.components.TravelBookingButton
 import com.franksap2.travelbooking.core.ui.extensions.formatCurrency
@@ -220,7 +220,7 @@ private fun Content(
         if (uiState.detailType == DetailType.Info) {
             PlaceInfo(place = uiState.place)
         } else {
-            Box(modifier = Modifier.size(100.dp))
+            Calendar()
         }
     }
 
