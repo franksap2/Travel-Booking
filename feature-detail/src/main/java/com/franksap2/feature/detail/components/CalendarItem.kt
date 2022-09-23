@@ -3,19 +3,24 @@ package com.franksap2.feature.detail.components
 import android.graphics.Paint
 import android.icu.text.DateFormatSymbols
 import android.text.TextPaint
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.TextUnit
@@ -23,14 +28,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import kotlin.math.ceil
+import kotlin.math.floor
 import java.util.Calendar as JavaCalendar
 
 
-private const val DAYS_IN_WEEK = 7
+internal const val DAYS_IN_WEEK = 7
 
 
 @Composable
-fun CalendarItem(month: Int) {
+fun CalendarItem(
+    month: Int,
+    calendarState: CalendarState
+) {
+
+    val selectedDayAnimation = remember { Animatable(IntRange.EMPTY, IntRangeToVector, IntRange.VisibilityThreshold) }
+
+    LaunchedEffect(calendarState.fromDay, calendarState.toDay) {
+        with(calendarState) {
+            if (month == this.month) {
+                selectedDayAnimation.snapTo(fromDay..fromDay)
+                if (fromDay != toDay && toDay != 0) {
+                    val target = if (toDay < fromDay) toDay..fromDay else fromDay..toDay
+                    selectedDayAnimation.animateTo(target)
+                }
+            }
+        }
+    }
 
     val weekDayTextPaintPaint = rememberTextPaint(textSize = 16.sp, color = MaterialTheme.colors.onBackground.copy(alpha = 0.3f))
     val textPaint = rememberTextPaint(textSize = 16.sp, color = MaterialTheme.colors.onBackground)
@@ -52,12 +75,42 @@ fun CalendarItem(month: Int) {
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(contentHeight.dp),
+                .height(contentHeight.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures {
+                        processTouch(it, cellSize, startOffset, maxDaysOffset) {
+                            calendarState.setDay(it, month)
+                        }
+                    }
+                },
             onDraw = {
-                drawCalendar(maxDaysOffset, startOffset, textPaint, cellSize)
+
+                val daysRange = selectedDayAnimation.value
+
+                drawCalendar(maxDaysOffset, startOffset, textPaint, cellSize, daysRange)
                 drawDays(dayLabels, cellSize, weekDayTextPaintPaint)
             }
         )
+    }
+}
+
+private fun processTouch(
+    offset: Offset,
+    cellSize: Int,
+    startOffset: Int,
+    maxDaysOffset: Int,
+    onDaySelected: (Int) -> Unit
+) {
+
+
+    val rowTouched = floor((offset.y - cellSize) / cellSize).toInt()
+    val columnTouched = floor(offset.x / cellSize).toInt()
+
+    val index = columnTouched + rowTouched * DAYS_IN_WEEK
+
+    if (index in startOffset until maxDaysOffset) {
+        val normalizedDay = index - startOffset + 1
+        onDaySelected(normalizedDay)
     }
 }
 
@@ -86,7 +139,8 @@ private fun DrawScope.drawCalendar(
     maxDaysOffset: Int,
     startOffset: Int,
     textPaint: TextPaint,
-    cellSize: Int
+    cellSize: Int,
+    selectRange: IntRange
 ) {
     val rowCenter = cellSize / 2
     var previousHeight = cellSize
@@ -94,13 +148,24 @@ private fun DrawScope.drawCalendar(
     var column = startOffset
 
     for (i in startOffset until maxDaysOffset) {
+
+        val day = i - startOffset + 1
+
+        drawSelectedRange(
+            selectRange,
+            day,
+            cellSize,
+            previousHeight,
+            previousLeft,
+            column
+        )
+
         drawDate(
-            i,
             rowCenter,
             previousHeight,
             previousLeft,
-            startOffset,
-            textPaint
+            textPaint,
+            day
         )
 
         if (column == DAYS_IN_WEEK - 1) {
@@ -115,15 +180,12 @@ private fun DrawScope.drawCalendar(
 }
 
 private fun DrawScope.drawDate(
-    index: Int,
     rowCenter: Int,
     previousHeight: Int,
     previousLeft: Int,
-    startOffset: Int,
-    textPaint: TextPaint
+    textPaint: TextPaint,
+    day: Int
 ) {
-
-    val day = index - startOffset + 1
 
     drawIntoCanvas {
         it.nativeCanvas.drawText(

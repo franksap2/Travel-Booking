@@ -38,6 +38,8 @@ fun Calendar() {
 
     val state = rememberPagerState()
 
+    val calendarState = rememberCalendarState()
+
     Column(modifier = Modifier.padding(top = 12.dp)) {
 
         MonthText(state = state)
@@ -48,7 +50,7 @@ fun Calendar() {
             modifier = Modifier.animateContentSize(),
             verticalAlignment = Alignment.Top
         ) { month ->
-            CalendarItem(month)
+            CalendarItem(month, calendarState)
         }
 
     }
@@ -66,7 +68,7 @@ private fun MonthText(state: PagerState) {
     AnimatedContent(
         targetState = state.currentPage,
         transitionSpec = {
-            if (initialState> targetState) {
+            if (initialState > targetState) {
                 slideInVertically { -it } + fadeIn() with slideOutVertically { it } + fadeOut()
             } else {
                 slideInVertically { it } + fadeIn() with slideOutVertically { -it } + fadeOut()
