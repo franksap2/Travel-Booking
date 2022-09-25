@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalPagerApi::class)
 
-package com.franksap2.feature.detail.components
+package com.franksap2.feature.calendar
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -20,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.franksap2.feature.calendar.components.CalendarItem
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -31,7 +32,6 @@ import java.util.Calendar as JavaCalendar
 
 private const val MAX_MONTHS = 12
 private const val FIVE_YEARS = MAX_MONTHS * 5
-
 
 @Composable
 fun Calendar() {

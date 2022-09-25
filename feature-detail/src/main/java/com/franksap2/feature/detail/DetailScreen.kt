@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.franksap2.data.places.model.Place
-import com.franksap2.feature.detail.components.Calendar
+import com.franksap2.feature.calendar.Calendar
 import com.franksap2.travelbooking.core.ui.components.LocationText
 import com.franksap2.travelbooking.core.ui.components.TravelBookingButton
 import com.franksap2.travelbooking.core.ui.extensions.formatCurrency

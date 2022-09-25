@@ -1,4 +1,4 @@
-package com.franksap2.feature.detail.components
+package com.franksap2.feature.calendar.components
 
 import androidx.compose.animation.core.AnimationVector2D
 import androidx.compose.animation.core.TwoWayConverter
@@ -15,7 +15,3 @@ val IntRangeToVector: TwoWayConverter<IntRange, AnimationVector2D> =
 
 val IntRange.Companion.VisibilityThreshold: IntRange
     get() = IntRange(1, 1)
-
-
-
-data class FloatRange(val first: Float, val last: Float)

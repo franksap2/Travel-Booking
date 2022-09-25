@@ -1,4 +1,4 @@
-package com.franksap2.feature.detail.components
+package com.franksap2.feature.calendar
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable

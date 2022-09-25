@@ -1,10 +1,11 @@
-package com.franksap2.feature.detail.components
+package com.franksap2.feature.calendar.components
 
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.franksap2.travelbooking.core.ui.theme.Orange700
+
 
 internal fun DrawScope.drawSelectedRange(
     selectRange: IntRange,

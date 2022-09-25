@@ -1,4 +1,4 @@
-package com.franksap2.feature.detail.components
+package com.franksap2.feature.calendar.components
 
 import android.graphics.Paint
 import android.icu.text.DateFormatSymbols
@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
+import com.franksap2.feature.calendar.CalendarState
+import com.franksap2.feature.calendar.rememberCalendar
 import kotlin.math.ceil
 import kotlin.math.floor
 import java.util.Calendar as JavaCalendar
@@ -34,15 +36,15 @@ import java.util.Calendar as JavaCalendar
 
 internal const val DAYS_IN_WEEK = 7
 
-
 @Composable
-fun CalendarItem(
+internal fun CalendarItem(
     month: Int,
     calendarState: CalendarState
 ) {
 
     val selectedDayAnimation = remember { Animatable(IntRange.EMPTY, IntRangeToVector, IntRange.VisibilityThreshold) }
 
+    //TODO: Rework day range select animation
     LaunchedEffect(calendarState.fromDay, calendarState.toDay) {
         with(calendarState) {
             if (month == this.month) {
