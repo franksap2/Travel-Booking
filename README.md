@@ -1,7 +1,7 @@
 # Travel Booking Compose (work-in-progress :construction:)
 
 
-A travel booking app made in Jectpack Compose, current screens state are still in development 
+A travel booking app made in Jetpack Compose, current screens state are still in development 
 
 |  Onboarding   |  Home  | Detail | Calendar |
 |:----------:|:-------------:|:------:|:------:|
