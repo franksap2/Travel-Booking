@@ -2,27 +2,45 @@ package com.franksap2.feature.calendar.components
 
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.unit.dp
+import com.franksap2.feature.calendar.CalendarState
 import com.franksap2.travelbooking.core.ui.theme.Orange700
 
 
 internal fun DrawScope.drawSelectedRange(
-    selectRange: IntRange,
+    selectRange: DateRange,
     day: Int,
     cellSize: Int,
     previousHeight: Int,
     previousLeft: Int,
     column: Int,
+    rangePath: Path,
+    calendarState: CalendarState
 ) {
 
-    val isFirstDaySelected = day == selectRange.first
-    val isLastDaySelected = day == selectRange.last
+
+    val isFirstDaySelected = day == calendarState.fromDay
+    val isLastDaySelected = day == calendarState.toDay
     val isDaysSelected = isFirstDaySelected || isLastDaySelected
-    val onlyOneDaySelected = selectRange.last == 0 && selectRange.first == day
+
+    if (isDaysSelected || day in calendarState.fromDay..calendarState.toDay) {
+
+        val animProgress =
+            ((selectRange.to - calendarState.fromDay) / (calendarState.toDay - calendarState.fromDay)).coerceIn(0f, 1f)
+
+        val dayOffset =
+            ((day - calendarState.fromDay) / ((calendarState.toDay + 1) - calendarState.fromDay).toFloat()).coerceIn(0f, 1f)
+
+        val percentPerSlot = 1 / (calendarState.toDay + 1 - calendarState.fromDay.toFloat())
 
 
-    if (onlyOneDaySelected || day in selectRange) {
+        val adjustedProgress = ((animProgress - dayOffset) / (percentPerSlot)).coerceIn(0f, 1f)
+
 
         val rowCenter = cellSize / 2f
         val rectHeight = cellSize * 0.5f
@@ -30,17 +48,17 @@ internal fun DrawScope.drawSelectedRange(
         if (isDaysSelected) {
             val direction = if (isFirstDaySelected) rowCenter else 0f
 
-            if (!onlyOneDaySelected && selectRange.last != selectRange.first) {
+            if (selectRange.to != selectRange.from && calendarState.toDay != 0) {
                 drawRect(
-                    Orange700,
+                    Orange700.copy(alpha = 0.7f),
                     topLeft = Offset(previousLeft.toFloat() + direction, previousHeight.toFloat() + rectHeight / 2),
-                    size = Size(rowCenter, rectHeight)
+                    size = Size(rowCenter * adjustedProgress, rectHeight)
                 )
             }
 
-
             drawCircle(
-                color = Orange700, radius = rowCenter,
+                color = Orange700,
+                radius = rowCenter * (if (isFirstDaySelected) 1f else adjustedProgress),
                 center = Offset(previousLeft.toFloat() + rowCenter, previousHeight.toFloat() + rowCenter),
             )
         } else {
@@ -48,21 +66,38 @@ internal fun DrawScope.drawSelectedRange(
             val isCornerLeft = column == 0
             val isCornerRight = column == DAYS_IN_WEEK - 1
 
-            val radius = if (isCornerRight || isCornerLeft) CornerRadius(25f, 25f) else CornerRadius.Zero
 
-            val offsetX = when {
-                isCornerLeft -> 25f
-                isCornerRight -> -25f
-                else -> 0f
+            rangePath.apply {
+                reset()
+                addRoundRect(
+                    getRoundRect(
+                        offset = Offset(previousLeft.toFloat(), previousHeight.toFloat() + rectHeight / 2),
+                        size = Size(cellSize.toFloat() * adjustedProgress, rectHeight),
+                        isCornerRight = isCornerRight,
+                        isCornerLeft = isCornerLeft
+                    )
+                )
+                close()
             }
 
-            drawRoundRect(
-                color = Orange700,
-                topLeft = Offset(previousLeft.toFloat() + offsetX, previousHeight.toFloat() + rectHeight / 2),
-                size = Size(cellSize.toFloat(), rectHeight),
-                cornerRadius = radius
-            )
-
+            drawPath(rangePath, color = Orange700.copy(alpha = 0.7f))
         }
     }
+}
+
+private fun DrawScope.getRoundRect(
+    offset: Offset,
+    size: Size,
+    isCornerRight: Boolean,
+    isCornerLeft: Boolean
+): RoundRect {
+    val cornerRadius = CornerRadius(20.dp.toPx())
+
+    return RoundRect(
+        rect = Rect(offset, size),
+        topLeft = if (isCornerLeft) cornerRadius else CornerRadius.Zero,
+        bottomLeft = if (isCornerLeft) cornerRadius else CornerRadius.Zero,
+        topRight = if (isCornerRight) cornerRadius else CornerRadius.Zero,
+        bottomRight = if (isCornerRight) cornerRadius else CornerRadius.Zero,
+    )
 }

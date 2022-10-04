@@ -1,6 +1,5 @@
 package com.franksap2.feature.calendar
 
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -39,7 +38,6 @@ class CalendarState(
         private set
 
     fun setDay(day: Int, month: Int) {
-        LazyListState
         this.month = month
 
         when {

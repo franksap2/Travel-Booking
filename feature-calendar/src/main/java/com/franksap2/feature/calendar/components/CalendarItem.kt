@@ -4,6 +4,7 @@ import android.graphics.Paint
 import android.icu.text.DateFormatSymbols
 import android.text.TextPaint
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -16,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
@@ -33,7 +35,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import java.util.Calendar as JavaCalendar
 
-
+private const val RANGE_DURATION = 300
 internal const val DAYS_IN_WEEK = 7
 
 @Composable
@@ -42,16 +44,18 @@ internal fun CalendarItem(
     calendarState: CalendarState
 ) {
 
-    val selectedDayAnimation = remember { Animatable(IntRange.EMPTY, IntRangeToVector, IntRange.VisibilityThreshold) }
+    val rangePath = remember { Path() }
+    val selectedDayAnimation = remember { Animatable(DateRange.EMPTY, DateRangeToVector, DateRange.VisibilityThreshold) }
 
-    //TODO: Rework day range select animation
+    //TODO: Rework day range select animation, pending to add reverse animation and move logic to state
     LaunchedEffect(calendarState.fromDay, calendarState.toDay) {
         with(calendarState) {
             if (month == this.month) {
-                selectedDayAnimation.snapTo(fromDay..fromDay)
+                selectedDayAnimation.snapTo(fromDay.toFloat() rangeTo fromDay.toFloat())
                 if (fromDay != toDay && toDay != 0) {
-                    val target = if (toDay < fromDay) toDay..fromDay else fromDay..toDay
-                    selectedDayAnimation.animateTo(target)
+                    val target =
+                        if (toDay < fromDay) toDay.toFloat() rangeTo fromDay.toFloat() else fromDay.toFloat() rangeTo toDay.toFloat()
+                    selectedDayAnimation.animateTo(target, tween(RANGE_DURATION))
                 }
             }
         }
@@ -89,7 +93,7 @@ internal fun CalendarItem(
 
                 val daysRange = selectedDayAnimation.value
 
-                drawCalendar(maxDaysOffset, startOffset, textPaint, cellSize, daysRange)
+                drawCalendar(maxDaysOffset, startOffset, textPaint, cellSize, daysRange, rangePath, calendarState)
                 drawDays(dayLabels, cellSize, weekDayTextPaintPaint)
             }
         )
@@ -142,7 +146,9 @@ private fun DrawScope.drawCalendar(
     startOffset: Int,
     textPaint: TextPaint,
     cellSize: Int,
-    selectRange: IntRange
+    selectRange: DateRange,
+    rangePath: Path,
+    calendarState: CalendarState
 ) {
     val rowCenter = cellSize / 2
     var previousHeight = cellSize
@@ -159,7 +165,9 @@ private fun DrawScope.drawCalendar(
             cellSize,
             previousHeight,
             previousLeft,
-            column
+            column,
+            rangePath,
+            calendarState
         )
 
         drawDate(
