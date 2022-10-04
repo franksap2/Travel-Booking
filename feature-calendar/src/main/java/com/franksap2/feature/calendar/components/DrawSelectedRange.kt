@@ -58,7 +58,7 @@ internal fun DrawScope.drawSelectedRange(
 
             drawCircle(
                 color = Orange700,
-                radius = rowCenter * (if (isFirstDaySelected) 1f else adjustedProgress),
+                radius = rowCenter,
                 center = Offset(previousLeft.toFloat() + rowCenter, previousHeight.toFloat() + rowCenter),
             )
         } else {

@@ -14,6 +14,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.res.ResourcesCompat
 import com.franksap2.feature.calendar.CalendarState
 import com.franksap2.feature.calendar.rememberCalendar
+import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.floor
 import java.util.Calendar as JavaCalendar
@@ -44,18 +46,17 @@ internal fun CalendarItem(
     calendarState: CalendarState
 ) {
 
+    val coroutineScope = rememberCoroutineScope()
     val rangePath = remember { Path() }
     val selectedDayAnimation = remember { Animatable(DateRange.EMPTY, DateRangeToVector, DateRange.VisibilityThreshold) }
 
-    //TODO: Rework day range select animation, pending to add reverse animation and move logic to state
+    //TODO: Rework day range select animation, pending to support range between months
     LaunchedEffect(calendarState.fromDay, calendarState.toDay) {
         with(calendarState) {
             if (month == this.month) {
                 selectedDayAnimation.snapTo(fromDay.toFloat() rangeTo fromDay.toFloat())
                 if (fromDay != toDay && toDay != 0) {
-                    val target =
-                        if (toDay < fromDay) toDay.toFloat() rangeTo fromDay.toFloat() else fromDay.toFloat() rangeTo toDay.toFloat()
-                    selectedDayAnimation.animateTo(target, tween(RANGE_DURATION))
+                    selectedDayAnimation.animateTo(fromDay.toFloat() rangeTo toDay.toFloat(), tween(RANGE_DURATION))
                 }
             }
         }
@@ -85,7 +86,10 @@ internal fun CalendarItem(
                 .pointerInput(Unit) {
                     detectTapGestures {
                         processTouch(it, cellSize, startOffset, maxDaysOffset) {
-                            calendarState.setDay(it, month)
+                            calendarState.setDay(it, month) {
+                                coroutineScope.launch { selectedDayAnimation.snapTo(it.toFloat() rangeTo it.toFloat()) }
+                            }
+
                         }
                     }
                 },

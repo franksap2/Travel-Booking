@@ -37,13 +37,18 @@ class CalendarState(
     var month by mutableStateOf(month)
         private set
 
-    fun setDay(day: Int, month: Int) {
+    fun setDay(day: Int, month: Int, snapTo: (Int) -> Unit) {
         this.month = month
 
         when {
             fromDay == 0 || toDay != 0 -> {
                 fromDay = day
                 toDay = 0
+            }
+            fromDay > day -> {
+                snapTo(toDay)
+                toDay = fromDay
+                fromDay = day
             }
             toDay == 0 -> toDay = day
         }
