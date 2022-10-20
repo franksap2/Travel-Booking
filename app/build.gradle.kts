@@ -9,13 +9,14 @@ plugins {
 }
 apply(plugin = "kotlin-android")
 
-android {
-    compileSdk = Versions.compileSdk
+apply {
+    from("${rootProject.projectDir}/gradle/conventions/android-library-convention.gradle")
+    from("${rootProject.projectDir}/gradle/conventions/compose-convention.gradle")
+}
 
+android {
     defaultConfig {
         applicationId = "com.franksap2.travelbooking"
-        minSdk = Versions.minSdk
-        targetSdk = Versions.targetSdk
         versionCode = 1
         versionName = "1.0"
 
@@ -34,19 +35,7 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.compose_compiler
-    }
+
     packagingOptions {
         resources.excludes += "META-INF/AL2.0"
         resources.excludes += "META-INF/LGPL2.1"

@@ -6,40 +6,9 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
-
-android {
-    compileSdk = Versions.compileSdk
-
-    defaultConfig {
-        minSdk = Versions.minSdk
-        targetSdk = Versions.targetSdk
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        consumerProguardFiles("consumer-rules.pro")
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        compose = true
-    }
-    composeOptions {
-        kotlinCompilerExtensionVersion = Versions.compose_compiler
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+apply {
+    from("${rootProject.projectDir}/gradle/conventions/android-library-convention.gradle")
+    from("${rootProject.projectDir}/gradle/conventions/compose-convention.gradle")
 }
 
 dependencies {
